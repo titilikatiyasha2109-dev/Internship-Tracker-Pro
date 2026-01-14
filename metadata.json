@@ -1,0 +1,9 @@
+
+{
+  "name": "InternTrack Pro",
+  "description": "Enterprise-grade internship tracking with real Google Calendar integration, AI insights via Gemini, and professional Kanban workflows.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
