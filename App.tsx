@@ -9,6 +9,20 @@ import { AIInsights } from './components/AIInsights';
 import { CalendarView } from './components/CalendarView';
 import { KanbanView } from './components/KanbanView';
 import { ThemeToggle } from './components/ThemeToggle';
+useEffect(() => {
+  if (!(window as any).google) return;
+
+  (window as any).google.accounts.id.initialize({
+    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    callback: handleGoogleLogin,
+  });
+
+  (window as any).google.accounts.id.renderButton(
+    document.getElementById("googleSignInBtn"),
+    { theme: "outline", size: "large" }
+  );
+}, []);
+
 
 const App: React.FC = () => {
   const [applications, setApplications] = useState<InternshipApplication[]>([]);
@@ -67,6 +81,19 @@ const App: React.FC = () => {
       app.id === id ? { ...app, status: newStatus, lastUpdate: new Date().toISOString() } : app
     ));
   };
+
+  const handleGoogleLogin = (response: any) => {
+  console.log("Google ID Token:", response.credential);
+
+  // Abhi ke liye simple demo:
+  setUser({
+    name: "Google User",
+    goal: "Land a top-tier tech internship",
+    targetIndustry: "Technology",
+  });
+
+  alert("Google login successful!");
+};
 
   const syncWithGoogle = async () => {
     setSyncStatus('syncing');
@@ -245,6 +272,7 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <div id="googleSignInBtn"></div>
             <ThemeToggle theme={theme} toggle={toggleTheme} />
             <button onClick={() => setShowForm(true)} className="bg-indigo-600 text-white px-8 py-3.5 rounded-2xl font-black shadow-xl shadow-indigo-500/20 active:scale-95 transition-all">
               Log App
