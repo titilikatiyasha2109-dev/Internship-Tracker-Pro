@@ -31,7 +31,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ applications }) => {
   const handleLogin = () => {
     try {
       const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: (process.env as any).GOOGLE_CLIENT_ID || '418512165979-un7v09v1t5m2un2n2v2n2v2n2v2n2v2n.apps.googleusercontent.com', // Replace with real ID
+        //@ts-ignore
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '1009349046392-9c1idl0q30o1mn3joe77qvfeitmfeo5d.apps.googleusercontent.com', // Replace with real ID
         scope: 'https://www.googleapis.com/auth/calendar.events',
         callback: (response: any) => {
           if (response.access_token) {
