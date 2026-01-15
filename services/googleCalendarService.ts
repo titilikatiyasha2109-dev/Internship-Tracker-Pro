@@ -2,8 +2,10 @@
 import { InternshipApplication } from "../types";
 
 // The Client ID should be provided via environment variables for security and portability.
-const CLIENT_ID = (process.env as any).GOOGLE_CLIENT_ID || 'REPLACE_WITH_YOUR_CLIENT_ID.apps.googleusercontent.com';
-
+//@ts-ignore
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '1009349046392-9c1idl0q30o1mn3joe77qvfeitmfeo5d.apps.googleusercontent.com'
+//@ts-ignore
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 export const googleCalendarService = {
   getAccessToken(): string | null {
     return localStorage.getItem('google_access_token');
