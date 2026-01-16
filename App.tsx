@@ -21,6 +21,7 @@ const App: React.FC = () => {
     if (!(window as any).google) return;
 
     (window as any).google.accounts.id.initialize({
+      //@ts-ignore
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: handleGoogleLogin,
     });
