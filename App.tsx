@@ -203,7 +203,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-slate-900 dark:bg-slate-800 p-8 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-6 border-4 border-indigo-500/30">
+            {/* <div className="bg-slate-900 dark:bg-slate-800 p-8 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-6 border-4 border-indigo-500/30">
               <div className="text-center md:text-left">
                 <h4 className="font-black text-xl italic mb-1">Google Forms Sync</h4>
                 <p className="text-slate-400 text-sm">Update your local database with external sheet responses.</p>
@@ -211,7 +211,7 @@ const App: React.FC = () => {
               <button onClick={syncWithGoogle} className="w-full md:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black shadow-lg transition-all active:scale-95">
                 Sync Pipeline
               </button>
-            </div>
+            </div> */}
           </div>
         );
     }

@@ -117,7 +117,7 @@ export const ApplicationForm: React.FC<ApplicationFormProps> = ({ onSubmit, onCa
                 <label className="block text-xs font-black text-amber-600 dark:text-amber-400 mb-2 uppercase tracking-widest">Interview Schedule</label>
                 <input
                   type="datetime-local"
-                  value={formData.interviewDate}
+                  value={formData.interviewDate||" "}
                   onChange={e => setFormData({...formData, interviewDate: e.target.value})}
                   className="w-full bg-white dark:bg-slate-900 border-2 border-amber-100 dark:border-amber-500/30 rounded-2xl px-5 py-3.5 text-slate-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-medium"
                 />
