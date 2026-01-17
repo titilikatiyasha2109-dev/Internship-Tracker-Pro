@@ -92,14 +92,54 @@ const [interviews, setInterviews] = useState([
     setApplications(prev => [...prev, appWithId]);
     setShowForm(false);
   };
+const handleAddContact = () => {
+  const name = prompt("Enter Contact Name:");
+  const company = prompt("Enter Company:");
+  const role = prompt("Enter Role (e.g. Recruiter):");
 
+  if (name && company) {
+    const newContact = {
+      id: Date.now(), // Unique ID generator
+      name,
+      company,
+      role: role || 'Contact',
+      link: '#'
+    };
+    setContacts(prev => [...prev, newContact]);
+  }
+};
   const updateStatus = (id: string, newStatus: ApplicationStatus) => {
     setApplications(prev => prev.map(app => 
       app.id === id ? { ...app, status: newStatus, lastUpdate: new Date().toISOString() } : app
     ));
   };
+const handleAddInterview = () => {
+  const company = prompt("Company Name:");
+  const questions = prompt("Key Questions Asked (Separated by commas):");
+  const rating = prompt("Rate your performance (1 to 5):");
 
+  if (company) {
+    const newInterview = {
+      id: Date.now(),
+      company,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      questions: questions || 'No notes added',
+      rating: parseInt(rating) || 5
+    };
+    setInterviews(prev => [...prev, newInterview]);
+  }
+};
 
+// Save Interviews whenever they change
+useEffect(() => {
+  localStorage.setItem('interviews_data', JSON.stringify(interviews));
+}, [interviews]);
+
+// Initial Load mein ise bhi uthayein
+useEffect(() => {
+  const savedInterviews = localStorage.getItem('interviews_data');
+  if (savedInterviews) setInterviews(JSON.parse(savedInterviews));
+}, []);
   const syncWithGoogle = async () => {
     setSyncStatus('syncing');
     await dbService.syncFromGoogleForm();
@@ -230,8 +270,16 @@ const [interviews, setInterviews] = useState([
                   <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500"><Linkedin size={20} /></div>
                   <h2 className="text-xl font-bold dark:text-white">Networking CRM</h2>
                 </div>
-                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
+                <button  
+                onClick={handleAddContact}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
                   <Plus size={20} />
+                </button>
+                <button 
+                onClick={handleAddContact} 
+                className="p-4 border-2 border-dashed               border-slate-200 dark:border-slate-800 rounded-2xl              flex items-center justify-center gap-2              text-slate-400 hover:border-indigo-500            hover:text-indigo-500 transition-all"
+>             
+                <Plus size={16} /> <span className="text-xs               font-bold uppercase">Add Expert</span>
                 </button>
               </div>
                   
@@ -256,6 +304,12 @@ const [interviews, setInterviews] = useState([
                 <div className="p-2 bg-amber-500/10 rounded-xl text-amber-500"><BookOpen size={20} /></div>
                 <h2 className="text-xl font-bold dark:text-white">Interview Knowledge Vault</h2>
               </div>
+                  <button 
+                    onClick={handleAddInterview}
+                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+                                >
+                    <Plus size={20} />
+                  </button>
               <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800">
                  <table className="w-full text-left text-sm">
                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 uppercase text-[10px] font-black tracking-widest">
