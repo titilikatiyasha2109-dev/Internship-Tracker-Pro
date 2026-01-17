@@ -1,4 +1,4 @@
-
+import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, ExternalLink } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InternshipApplication, ApplicationStatus, UserProfile } from './types';
@@ -31,6 +31,17 @@ const App: React.FC = () => {
       { theme: "outline", size: "large" }
     );
   }, []);
+  // Inside App function
+const [contacts, setContacts] = useState([
+  { id: 1, name: 'Sarah Chen', company: 'Google', role: 'Technical Recruiter', link: '#' },
+  { id: 2, name: 'Marcus Smith', company: 'Stripe', role: 'Engineering Manager', link: '#' },
+]);
+
+const [interviews, setInterviews] = useState([
+  { id: 1, company: 'Meta', date: 'Oct 12', questions: 'System design, React hooks deep dive', rating: 4 },
+  { id: 2, company: 'Vercel', date: 'Oct 15', questions: 'Edge functions, Tailwind optimization', rating: 5 },
+]);
+
   const [applications, setApplications] = useState<InternshipApplication[]>([]);
   const [user, setUser] = useState<UserProfile>({ name: 'Future Intern', goal: 'Land a top-tier tech internship', targetIndustry: 'Technology' });
   const [showForm, setShowForm] = useState(false);
@@ -158,62 +169,113 @@ const App: React.FC = () => {
         return <CalendarView applications={applications} />;
       case 'profile':
         return (
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl">
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-8">User Database Settings</h3>
+          <div className="max-w-7xl mx-auto space-y-6 p-4 overflow-y-auto">
+            {/* TOP ROW: Profile Settings & Deployment Status */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  
+              {/* 1. User Profile Settings (Your original logic, but better looking) */}
+              <div className="bg-white dark:bg-slate-900/60 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
+                <div className="flex items-center gap-3 mb-8">
+                   <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-500"><Users size={20} /></div>
+                   <h3 className="text-xl font-bold dark:text-white">Profile Intelligence</h3>
+                </div>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Display Name</label>
-                    <input type="text" value={user.name} onChange={e => setUser({...user, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none focus:ring-2 ring-indigo-500 text-slate-900 dark:text-white font-bold"/>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Display Name</label>
+                    <input 
+                      type="text" 
+                      value={user.name} 
+                      onChange={e => setUser({...user, name: e.target.value})} 
+                      className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none focus:ring-2 ring-indigo-500 text-slate-900 dark:text-white font-bold"
+                    />
                   </div>
                   <div>
-                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Primary Career Goal</label>
-                    <input type="text" value={user.goal} onChange={e => setUser({...user, goal: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none focus:ring-2 ring-indigo-500 text-slate-900 dark:text-white font-bold"/>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Primary Career Goal</label>
+                    <input 
+                      type="text" 
+                      value={user.goal} 
+                      onChange={e => setUser({...user, goal: e.target.value})} 
+                      className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none focus:ring-2 ring-indigo-500 text-slate-900 dark:text-white font-bold"
+                    />
                   </div>
                 </div>
               </div>
-              
-              <div className="space-y-8">
-                <div className="bg-indigo-600 p-10 rounded-[2.5rem] text-white shadow-xl shadow-indigo-500/20">
-                  <h4 className="font-black text-2xl mb-2 italic">Deployment Status</h4>
-                  <p className="text-indigo-100 text-sm mb-8">Your dashboard is active and synced to cloud storage.</p>
-                  <div className="flex items-center gap-4">
-                    <div className="px-4 py-2 bg-white/20 rounded-xl font-bold text-xs">Vercel Ready</div>
-                    <div className="px-4 py-2 bg-emerald-400 text-indigo-900 rounded-xl font-black text-xs">PRODUCTION LIVE</div>
+                  
+              {/* 2. Deployment Status & Integrations (Merged) */}
+              <div className="space-y-6">
+                <div className="bg-indigo-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden">
+                  <h4 className="font-black text-xl mb-2 italic">Deployment Status</h4>
+                  <p className="text-indigo-100 text-sm mb-6">Database is synced to cloud storage.</p>
+                  <div className="flex gap-3">
+                    <div className="px-4 py-2 bg-white/20 rounded-xl font-bold text-[10px] uppercase">Vercel Ready</div>
+                    <div className="px-4 py-2 bg-emerald-400 text-indigo-900 rounded-xl font-black text-[10px] uppercase">Production Live</div>
                   </div>
                 </div>
-                
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                   <h4 className="text-sm font-black text-slate-400 uppercase mb-6">Integrations</h4>
-                   <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-4">
-                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xs">G</div>
-                        <span className="font-bold text-slate-900 dark:text-white">Google Identity</span>
-                     </div>
-                     <div className="w-12 h-6 bg-emerald-500 rounded-full flex items-center justify-end px-1"><div className="w-4 h-4 bg-white rounded-full"></div></div>
-                   </div>
-                   <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-xs">AI</div>
-                        <span className="font-bold text-slate-900 dark:text-white">Gemini Insights</span>
-                     </div>
-                     <div className="w-12 h-6 bg-emerald-500 rounded-full flex items-center justify-end px-1"><div className="w-4 h-4 bg-white rounded-full"></div></div>
-                   </div>
+                  
+                <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-[2.5rem] p-6 backdrop-blur-md">
+                  <div className="flex items-center gap-2 text-indigo-400 text-[10px] font-bold uppercase tracking-widest mb-3">
+                    <MessageSquare size={14} /> Gemini Strategy Insight
+                  </div>
+                  <p className="text-indigo-100/70 text-xs leading-relaxed italic">
+                    "Goal: {user.goal}. Gemini suggests adding 2 more FAANG contacts to your CRM this week to increase offer probability by 15%."
+                  </p>
                 </div>
               </div>
             </div>
-
-            {/* <div className="bg-slate-900 dark:bg-slate-800 p-8 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-6 border-4 border-indigo-500/30">
-              <div className="text-center md:text-left">
-                <h4 className="font-black text-xl italic mb-1">Google Forms Sync</h4>
-                <p className="text-slate-400 text-sm">Update your local database with external sheet responses.</p>
+                  
+            {/* MIDDLE ROW: NETWORKING CRM */}
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500"><Linkedin size={20} /></div>
+                  <h2 className="text-xl font-bold dark:text-white">Networking CRM</h2>
+                </div>
+                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
+                  <Plus size={20} />
+                </button>
               </div>
-              <button onClick={syncWithGoogle} className="w-full md:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black shadow-lg transition-all active:scale-95">
-                Sync Pipeline
-              </button>
-            </div> */}
-          </div>
+                  
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Example Contact Item */}
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-transparent hover:border-indigo-500/30 transition-all flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">S</div>
+                     <div>
+                       <div className="text-sm font-bold dark:text-white">Sarah Chen</div>
+                       <div className="text-[10px] text-slate-500 uppercase font-black">Recruiter @ Google</div>
+                     </div>
+                  </div>
+                  <ExternalLink size={14} className="text-slate-400" />
+                </div>
+              </div>
+            </div>
+                  
+            {/* BOTTOM ROW: INTERVIEW KNOWLEDGE VAULT */}
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-amber-500/10 rounded-xl text-amber-500"><BookOpen size={20} /></div>
+                <h2 className="text-xl font-bold dark:text-white">Interview Knowledge Vault</h2>
+              </div>
+              <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800">
+                 <table className="w-full text-left text-sm">
+                   <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 uppercase text-[10px] font-black tracking-widest">
+                     <tr>
+                       <th className="p-4">Company</th>
+                       <th className="p-4">Key Questions Noted</th>
+                       <th className="p-4 text-center">Status</th>
+                     </tr>
+                   </thead>
+                   <tbody className="dark:text-slate-300">
+                     <tr className="border-t border-slate-100 dark:border-slate-800">
+                       <td className="p-4 font-bold dark:text-white">Meta</td>
+                       <td className="p-4 italic">"How do you handle conflict in a sprint?"</td>
+                       <td className="p-4 text-center"><span className="px-2 py-1 bg-green-500/10 text-green-500 rounded text-[10px] font-bold">COMPLETED</span></td>
+                     </tr>
+                   </tbody>
+                 </table>
+              </div>
+            </div>
+</div>
         );
     }
   };
