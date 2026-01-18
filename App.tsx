@@ -31,16 +31,20 @@ const App: React.FC = () => {
       { theme: "outline", size: "large" }
     );
   }, []);
-  // Inside App function
-const [contacts, setContacts] = useState([
-  { id: 1, name: 'Sarah Chen', company: 'Google', role: 'Technical Recruiter', link: '#' },
-  { id: 2, name: 'Marcus Smith', company: 'Stripe', role: 'Engineering Manager', link: '#' },
-]);
 
-const [interviews, setInterviews] = useState([
-  { id: 1, company: 'Meta', date: 'Oct 12', questions: 'System design, React hooks deep dive', rating: 4 },
-  { id: 2, company: 'Vercel', date: 'Oct 15', questions: 'Edge functions, Tailwind optimization', rating: 5 },
-]);
+const [contacts, setContacts] = useState(() => {
+  const saved = localStorage.getItem('itp_contacts');
+  return saved ? JSON.parse(saved) : [
+    { id: 1, name: 'Sarah Chen', company: 'Google', role: 'Technical Recruiter', link: '#' }
+  ];
+});
+
+const [interviews, setInterviews] = useState(() => {
+  const saved = localStorage.getItem('itp_interviews');
+  return saved ? JSON.parse(saved) : [
+    { id: 1, company: 'Meta', date: 'Oct 12', questions: 'System design, React hooks', rating: 4 }
+  ];
+});
 
   const [applications, setApplications] = useState<InternshipApplication[]>([]);
   const [user, setUser] = useState<UserProfile>({ name: 'Future Intern', goal: 'Land a top-tier tech internship', targetIndustry: 'Technology' });
@@ -106,6 +110,8 @@ const handleAddContact = () => {
       link: '#'
     };
     setContacts(prev => [...prev, newContact]);
+    setSyncStatus('syncing');
+    setTimeout(() => setSyncStatus('saved'), 800);
   }
 };
   const updateStatus = (id: string, newStatus: ApplicationStatus) => {
@@ -127,9 +133,19 @@ const handleAddInterview = () => {
       rating: parseInt(rating) || 5
     };
     setInterviews(prev => [...prev, newInterview]);
+    setSyncStatus('syncing');
+    setTimeout(() => setSyncStatus('saved'), 800);
   }
 };
 
+// App.tsx mein baaki useEffects ke saath daalein
+useEffect(() => {
+  localStorage.setItem('itp_contacts', JSON.stringify(contacts));
+}, [contacts]);
+
+useEffect(() => {
+  localStorage.setItem('itp_interviews', JSON.stringify(interviews));
+}, [interviews]);
 // Save Interviews whenever they change
 useEffect(() => {
   localStorage.setItem('interviews_data', JSON.stringify(interviews));
@@ -270,32 +286,21 @@ useEffect(() => {
                   <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500"><Linkedin size={20} /></div>
                   <h2 className="text-xl font-bold dark:text-white">Networking CRM</h2>
                 </div>
-                <button  
-                onClick={handleAddContact}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
-                  <Plus size={20} />
-                </button>
                 <button 
                 onClick={handleAddContact} 
-                className="p-4 border-2 border-dashed               border-slate-200 dark:border-slate-800 rounded-2xl              flex items-center justify-center gap-2              text-slate-400 hover:border-indigo-500            hover:text-indigo-500 transition-all"
->             
+                className="p-4 border-2 border-dashed               border-slate-200 dark:border-slate-800 rounded-2xl              flex items-center justify-center gap-2              text-slate-400 hover:border-indigo-500            hover:text-indigo-500 transition-all">             
                 <Plus size={16} /> <span className="text-xs               font-bold uppercase">Add Expert</span>
                 </button>
               </div>
-                  
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Example Contact Item */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-transparent hover:border-indigo-500/30 transition-all flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">S</div>
-                     <div>
-                       <div className="text-sm font-bold dark:text-white">Sarah Chen</div>
-                       <div className="text-[10px] text-slate-500 uppercase font-black">Recruiter @ Google</div>
-                     </div>
-                  </div>
-                  <ExternalLink size={14} className="text-slate-400" />
-                </div>
+              {contacts.map((contact) => (
+                <div key={contact.id} className="...">
+                <div className="text-white font-bold">{contact.name}</div>
               </div>
+              ))}
+            </div>
+                  
+
             </div>
                   
             {/* BOTTOM ROW: INTERVIEW KNOWLEDGE VAULT */}
@@ -306,8 +311,7 @@ useEffect(() => {
               </div>
                   <button 
                     onClick={handleAddInterview}
-                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
-                                >
+                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors">
                     <Plus size={20} />
                   </button>
               <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800">
@@ -319,13 +323,13 @@ useEffect(() => {
                        <th className="p-4 text-center">Status</th>
                      </tr>
                    </thead>
-                   <tbody className="dark:text-slate-300">
-                     <tr className="border-t border-slate-100 dark:border-slate-800">
-                       <td className="p-4 font-bold dark:text-white">Meta</td>
-                       <td className="p-4 italic">"How do you handle conflict in a sprint?"</td>
-                       <td className="p-4 text-center"><span className="px-2 py-1 bg-green-500/10 text-green-500 rounded text-[10px] font-bold">COMPLETED</span></td>
-                     </tr>
-                   </tbody>
+                   <tbody>
+                    {interviews.map((item) => (
+                      <tr key={item.id} className="...">
+                        <td className="p-4 font-bold">{item.company}</td>
+                        </tr>
+                        ))}
+                    </tbody>
                  </table>
               </div>
             </div>
