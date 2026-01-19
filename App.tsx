@@ -185,7 +185,7 @@ const handleGenerateAI = async (id: number, question: string) => {
     
     // 2. Get the model (using the stable 1.5 flash)
     const model = genAI.getGenerativeModel(
-      { model: "gemini-1.5-flash" },
+      { model: "gemini-pro" },
       { apiVersion: "v1" } 
     );
 
