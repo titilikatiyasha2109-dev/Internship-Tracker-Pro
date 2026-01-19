@@ -238,15 +238,7 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contacts.map((contact: any) => (
                   <div key={contact.id} className="relative group p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2rem] border border-transparent hover:border-indigo-500/30 transition-all flex flex-col gap-5 shadow-sm">
-                        <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteContact(contact.id)}}
-                        className="absolute top-4 right-12 p-2 text-slate-400                   hover:text-rose-500 hover:bg-rose-500/10 rounded-xl                   transition-all opacity-0 group-hover:opacity-100 z-10"
-                        title="Delete Contact"
-                        >
-                        <Trash2 size={16} />
-                        </button>
+
                     <div className="flex justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-xl shadow-lg">{contact.name[0]}</div>
@@ -260,6 +252,14 @@ const App: React.FC = () => {
                     <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
                        <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium"><Mail size={12} /> {contact.email}</div>
                        <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium"><Phone size={12} /> {contact.phone}</div>
+                        <button 
+                        onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteContact(contact.id)}}
+                        className="absolute top-4 right-12 p-2 text-slate-400                   hover:text-rose-500 hover:bg-rose-500/10 rounded-xl                   transition-all opacity-0 group-hover:opacity-100 z-10"
+                        title="Delete Contact">
+                        <Trash2 size={16} />
+                        </button>
                     </div>
                   </div>
                 ))}
