@@ -253,6 +253,13 @@ const App: React.FC = () => {
                        <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium"><Mail size={12} /> {contact.email}</div>
                        <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium"><Phone size={12} /> {contact.phone}</div>
                     </div>
+                     <button 
+          onClick={() => handleDeleteContact(contact.id)}
+          className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+          title="Delete Contact"
+        >
+          <Trash2 size={16} />
+        </button>
                   </div>
                 ))}
                 <button onClick={handleAddContact} className="p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-indigo-500 hover:text-indigo-500 hover:bg-indigo-500/5 transition-all">
