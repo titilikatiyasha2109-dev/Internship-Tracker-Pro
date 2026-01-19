@@ -9,6 +9,7 @@ import { AIInsights } from './components/AIInsights';
 import { CalendarView } from './components/CalendarView';
 import { KanbanView } from './components/KanbanView';
 import { ThemeToggle } from './components/ThemeToggle';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const App: React.FC = () => {
   // --- 1. GOOGLE IDENTITY INITIALIZATION (With Retry Logic) ---
@@ -170,48 +171,40 @@ const App: React.FC = () => {
 // Function to generate/refresh AI response for an existing entry
 const handleGenerateAI = async (id: number, question: string) => {
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-  
+
   if (!apiKey) {
-    alert("Error: API Key is missing in .env file (VITE_GOOGLE_API_KEY)");
+    alert("API Key is missing. Please check your Vercel settings or .env file.");
     return;
   }
 
   setSyncStatus('syncing');
-  
+
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        contents: [{ 
-          parts: [{ text: `Provide a short, professional answer for this interview question: ${question}` }] 
-        }] 
-      })
-    });
+    // 1. Initialize the SDK
+    const genAI = new GoogleGenerativeAI(apiKey);
     
-    const data = await response.json();
+    // 2. Get the model (using the stable 1.5 flash)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // Check if Gemini returned an error (like invalid key or quota)
-    if (data.error) {
-       console.error("Gemini API Error:", data.error);
-       alert(`Gemini Error: ${data.error.message}`);
-       setSyncStatus('idle');
-       return;
-    }
+    // 3. Generate content
+    const prompt = `Provide a short, professional interview answer for: ${question}`;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-    const geminiAnswer = data.candidates[0].content.parts[0].text;
-
+    // 4. Update your state
     setInterviews((prev: any) => prev.map((item: any) => 
-      item.id === id ? { ...item, aiResponse: geminiAnswer } : item
+      item.id === id ? { ...item, aiResponse: text } : item
     ));
     
     setSyncStatus('saved');
-  } catch (e) {
-    console.error("Network Error:", e);
-    alert("Network error. Check your connection.");
+  } catch (error: any) {
+    console.error("Gemini Error:", error);
+    alert("AI Error: " + error.message);
     setSyncStatus('idle');
   }
 };
+
   const renderContent = () => {
     switch (view) {
       case 'dashboard':
