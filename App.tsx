@@ -167,6 +167,36 @@ const App: React.FC = () => {
   }
 };
 
+// Function to generate/refresh AI response for an existing entry
+const handleGenerateAI = async (id: number, question: string) => {
+  setSyncStatus('syncing');
+  
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GOOGLE_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        contents: [{ 
+          parts: [{ text: `Provide a short, professional, and high-quality answer for this technical interview question: ${question}` }] 
+        }] 
+      })
+    });
+    
+    const data = await response.json();
+    const geminiAnswer = data.candidates[0].content.parts[0].text;
+
+    // Update the specific interview entry in the state
+    setInterviews((prev: any) => prev.map((item: any) => 
+      item.id === id ? { ...item, aiResponse: geminiAnswer } : item
+    ));
+    
+    setSyncStatus('saved');
+  } catch (e) {
+    console.error("AI Fetch Error:", e);
+    alert("Could not reach Gemini. Please check your internet or API key.");
+    setSyncStatus('idle');
+  }
+};
   const renderContent = () => {
     switch (view) {
       case 'dashboard':
@@ -289,19 +319,37 @@ const App: React.FC = () => {
                    </thead>
                    <tbody className="dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-800">
                      {interviews.map((item: any) => (
-                       <tr key={item.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all">
-                         <td className="p-5 font-black dark:text-white text-base">{item.company}</td>
-                         <td className="p-5">
-                            <div className="font-bold mb-1">"{item.questions}"</div>
-                            <div className="text-[10px] text-indigo-400 italic bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10 group-hover:block hidden animate-in fade-in slide-in-from-top-1">
-                              ✨ <span className="font-black tracking-tighter uppercase mr-1">AI Response:</span> {item.aiResponse}
-                            </div>
-                         </td>
-                         <td className="p-5 text-center">
-                            <span className="px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-black">{item.rating}/5</span>
-                         </td>
-                       </tr>
-                     ))}
+  <tr 
+    key={item.id} 
+    // 1. Added cursor-pointer and onClick trigger
+    onClick={() => handleGenerateAI(item.id, item.questions)}
+    className="group hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all cursor-pointer"
+  >
+    <td className="p-5 font-black dark:text-white text-base">
+      {item.company}
+    </td>
+    <td className="p-5">
+      <div className="font-bold mb-1">"{item.questions}"</div>
+      
+      {/* 2. Modified visibility logic so it's always visible if it has text, 
+          or shows an instruction on hover if empty */}
+      <div className={`text-[10px] text-indigo-400 italic bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10 animate-in fade-in slide-in-from-top-1 
+        ${item.aiResponse ? 'block' : 'hidden group-hover:block opacity-60'}`}>
+        
+        ✨ <span className="font-black tracking-tighter uppercase mr-1">AI Response:</span> 
+        
+        {/* 3. Dynamic text based on status */}
+        {item.aiResponse || "Click this row to generate AI response..."}
+        
+      </div>
+    </td>
+    <td className="p-5 text-center">
+      <span className="px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-black">
+        {item.rating}/5
+      </span>
+    </td>
+  </tr>
+))}
                    </tbody>
                  </table>
               </div>
