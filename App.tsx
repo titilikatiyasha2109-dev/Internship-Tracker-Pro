@@ -1,4 +1,4 @@
-import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, Mail, Phone, Trash2 } from 'lucide-react';
+import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, Mail, Phone, Trash2, ShieldCheck} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InternshipApplication, ApplicationStatus, UserProfile } from './types';
@@ -12,10 +12,25 @@ import { ThemeToggle } from './components/ThemeToggle';
 
 const App: React.FC = () => {
   // --- 1. GOOGLE IDENTITY INITIALIZATION ---
-  const handleGoogleLogin = (response: any) => {
-    console.log("Google token:", response.credential);
-    alert("Login successful!");
-  };
+ const handleGoogleLogin = (response: any) => {
+  // Decode the Google Token (JWT) to get user info
+  const base64Url = response.credential.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const payload = JSON.parse(window.atob(base64));
+
+  console.log("Welcome:", payload.name);
+
+  // Update states
+  const newUser = { ...user, name: payload.name };
+  setUser(newUser);
+  setIsLoggedIn(true);
+
+  // Save to LocalStorage so they stay logged in on refresh
+  localStorage.setItem('isLoggedIn', 'true');
+  localStorage.setItem('itp_user', JSON.stringify(newUser));
+  
+  alert(`Welcome back, ${payload.name}! Database access granted.`);
+};
 
   useEffect(() => {
     const initGoogle = () => {
@@ -45,13 +60,19 @@ const App: React.FC = () => {
 
   const [interviews, setInterviews] = useState(() => {
     const saved = localStorage.getItem('itp_interviews');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, company: 'Meta', date: 'Oct 12', questions: 'How do you scale React apps?', rating: 4, aiResponse: 'Focus on code-splitting and state management optimization.' }
-    ];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [applications, setApplications] = useState<InternshipApplication[]>([]);
-  const [user, setUser] = useState<UserProfile>({ name: 'Future Intern', goal: 'Land a top-tier tech internship', targetIndustry: 'Technology' });
+const [isLoggedIn, setIsLoggedIn] = useState(() => {
+  return localStorage.getItem('isLoggedIn') === 'true';
+});
+
+// Update the user state to be empty initially
+const [user, setUser] = useState<UserProfile>(() => {
+  const saved = localStorage.getItem('itp_user');
+  return saved ? JSON.parse(saved) : { name: '', goal: '', targetIndustry: '' };
+});
   const [showForm, setShowForm] = useState(false);
   // Removed 'list' from view type
   const [view, setView] = useState<'dashboard' | 'kanban' | 'calendar' | 'profile'>('dashboard');
@@ -98,6 +119,12 @@ const App: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+  setIsLoggedIn(false);
+  localStorage.removeItem('isLoggedIn');
+  window.location.reload(); // Refresh to reset all states
+}; 
+
   const handleAddInterview = async () => {
     const company = prompt("Company Name:");
     const questions = prompt("Which question was asked?");
@@ -138,6 +165,29 @@ const App: React.FC = () => {
       setTimeout(() => setSyncStatus('saved'), 800);
     }
   };
+  
+  const handleExportData = () => {
+  // Combine all your data into one object
+  const dataToExport = {
+    contacts,
+    interviews,
+    applications,
+    user
+  };
+
+  // Convert to JSON string
+  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  // Create a temporary link and click it to download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `InternTrack_Backup_${new Date().toLocaleDateString()}.json`;
+  link.click();
+  
+  // Clean up
+  URL.revokeObjectURL(url);
+};
 
   const handleAddApplication = (newApp: Omit<InternshipApplication, 'id' | 'lastUpdate'>) => {
     const appWithId: InternshipApplication = {
@@ -161,6 +211,24 @@ const App: React.FC = () => {
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
+const LoginWall = () => (
+  <div className="flex flex-col items-center justify-center py-20 px-10 text-center bg-slate-900/40 rounded-[3rem] border border-dashed border-slate-800">
+    <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center text-indigo-500 mb-6">
+      <Users size={40} />
+    </div>
+    <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Access Restricted</h3>
+    <p className="text-slate-400 text-sm max-w-xs mb-8">
+      Please sign in with Google to unlock your personal Intelligence Hub and start tracking experts.
+    </p>
+    {/* This target div is where Google renders the button */}
+    {isLoggedIn && (
+  <button onClick={handleLogout} className="text-[10px] font-black uppercase text-slate-500 hover:text-rose-500 transition-colors">
+    Logout
+  </button>
+)}
+    <div id="googleSignInBtn"></div>
+  </div>
+);
 
   const renderContent = () => {
     switch (view) {
@@ -175,60 +243,122 @@ const App: React.FC = () => {
         return <KanbanView applications={applications} onStatusChange={updateStatus} />;
       case 'calendar':
         return <CalendarView applications={applications} />;
-      case 'profile':
+        case 'profile':
         return (
           <div className="max-w-7xl mx-auto space-y-10 p-4 pb-20">
-            {/* PROFILE SECTION */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-slate-900/60 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
+                        {!isLoggedIn ? (
+              <LoginWall />
+            ) : (
+              <>
+            {/* 1. TOP ROW: PROFILE & STATUS (Updated to 3 columns for 2:1 ratio) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              {/* Profile Strategy - Now wider (takes 2 parts) */}
+              <div className="lg:col-span-2 bg-white dark:bg-slate-900/60 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl backdrop-blur-md">
                 <div className="flex items-center gap-3 mb-8">
                    <div className="p-2.5 bg-indigo-500/10 rounded-xl text-indigo-500"><Users size={22} /></div>
                    <h3 className="text-xl font-black dark:text-white uppercase tracking-tight">Profile Strategy</h3>
                 </div>
                 <div className="space-y-6">
-                  <input type="text" value={user.name} onChange={e => setUser({...user, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none text-slate-900 dark:text-white font-bold" placeholder="Name" />
-                  <input type="text" value={user.goal} onChange={e => setUser({...user, goal: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none text-slate-900 dark:text-white font-bold" placeholder="Career Goal" />
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Display Name</label>
+                    <input type="text" value={user.name} onChange={e => setUser({...user, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none focus:ring-2 ring-indigo-500 text-slate-900 dark:text-white font-bold" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Career Goal</label>
+                    <input type="text" value={user.goal} onChange={e => setUser({...user, goal: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-none focus:ring-2 ring-indigo-500 text-slate-900 dark:text-white font-bold" />
+                  </div>
                 </div>
               </div>
-              <div className="bg-indigo-600 p-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-                <h4 className="font-black text-2xl mb-2 italic">Database Synced</h4>
-                <p className="text-indigo-100 text-sm mb-6 opacity-80">Your networking contacts and interview vault are stored locally.</p>
-              </div>
+
+{/* Database Synced Box - Decorated Version */}
+{/* Database Synced Box */}
+<div className="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-8 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-500/40 relative overflow-hidden flex flex-col justify-between border border-white/10">
+  
+  {/* ABSTRACT BACKGROUND GLOWS */}
+  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+  <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-400/20 rounded-full blur-2xl -ml-10 -mb-10"></div>
+
+  {/* NEW: CENTRAL CORRECT ELEMENT (White, Non-clickable, Centered) */}
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+    {/* We use opacity-20 to make it look like a premium watermark, 
+        or change to text-white if you want it solid white */}
+    <ShieldCheck size={140} strokeWidth={1} className="text-white opacity-20 filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+  </div>
+
+  {/* TOP SECTION: ICON & BADGE */}
+  <div className="relative z-10 flex justify-between items-start">
+    <button 
+  onClick={handleExportData}
+  className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 shadow-inner transition-all active:scale-90"
+  title="Export Backup"
+>
+  <Download size={20} className="text-indigo-200" />
+</button>
+    <div className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center gap-1.5">
+      <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+      <span className="text-[9px] font-black uppercase tracking-widest text-emerald-300">Active</span>
+    </div>
+  </div>
+
+  {/* BOTTOM SECTION: TEXT CONTENT */}
+  <div className="relative z-10">
+    <h4 className="font-black text-2xl mb-1 tracking-tight">Database <span className="text-indigo-200 italic">Synced</span></h4>
+    <p className="text-indigo-100/70 text-[11px] leading-relaxed font-medium">
+      Encryption active. Your local storage is verified and up to date.
+    </p>
+    
+    {/* PROGRESS BAR */}
+    <div className="mt-4 h-1 w-full bg-white/10 rounded-full overflow-hidden">
+      <motion.div 
+        initial={{ width: "0%" }}
+        animate={{ width: "100%" }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="h-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent"
+      />
+    </div>
+  </div>
+</div>
             </div>
 
-            {/* NETWORKING CRM */}
-            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-10">
+            {/* 2. NETWORKING CRM (Keep this as is) */}
+            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-10 shadow-sm">
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-blue-500/10 rounded-xl text-blue-500"><Linkedin size={22} /></div>
                   <h2 className="text-2xl font-black dark:text-white tracking-tight">Networking Hub</h2>
                 </div>
-                <button onClick={handleAddContact} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400"><Plus size={24} /></button>
+                <button onClick={handleAddContact} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors"><Plus size={24} /></button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contacts.map((contact: any) => (
-                  <div key={contact.id} className="relative group p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2rem] border border-transparent hover:border-indigo-500/30 transition-all flex flex-col gap-5">
-                    <button onClick={() => handleDeleteContact(contact.id)} className="absolute top-4 right-4 p-2 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16} /></button>
+                  <div key={contact.id} className="relative group p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2rem] border border-transparent hover:border-indigo-500/30 transition-all flex flex-col gap-5 shadow-sm">
+                    <button 
+                      onClick={() => handleDeleteContact(contact.id)}
+                      className="absolute top-4 right-4 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-xl">{contact.name[0]}</div>
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-xl shadow-lg">{contact.name[0]}</div>
                       <div>
-                        <div className="text-sm font-black dark:text-white">{contact.name}</div>
-                        <div className="text-[10px] text-indigo-500 uppercase font-black">{contact.company}</div>
+                        <div className="text-sm font-black dark:text-white leading-tight">{contact.name}</div>
+                        <div className="text-[10px] text-indigo-500 uppercase font-black tracking-widest mt-1">{contact.company}</div>
                       </div>
                     </div>
-                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2 text-[11px] text-slate-500">
-                       <div className="flex items-center gap-2"><Mail size={12} /> {contact.email}</div>
-                       <div className="flex items-center gap-2"><Phone size={12} /> {contact.phone}</div>
+                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                       <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium"><Mail size={12} /> {contact.email}</div>
+                       <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium"><Phone size={12} /> {contact.phone}</div>
                     </div>
                   </div>
                 ))}
-                <button onClick={handleAddContact} className="p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-indigo-500 transition-all">
-                  <Plus size={32} /> <span className="text-[10px] font-black uppercase">Add New Expert</span>
+                <button onClick={handleAddContact} className="p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-indigo-500 hover:text-indigo-500 transition-all">
+                  <Plus size={32} /> <span className="text-[10px] font-black uppercase tracking-widest">Add New Expert</span>
                 </button>
               </div>
             </div>
 
-            {/* INTERVIEW VAULT ( handleGenerateAI logic removed ) */}
+            {/* 3. INTERVIEW VAULT (Keep this as is) */}
             <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-10 shadow-sm">
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-3">
@@ -248,21 +378,22 @@ const App: React.FC = () => {
                    </thead>
                    <tbody className="dark:text-slate-300 divide-y divide-slate-100 dark:divide-slate-800">
                      {interviews.map((item: any) => (
-                      <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all">
-                        <td className="p-5 font-black dark:text-white text-base">{item.company}</td>
-                        <td className="p-5">
-                          <div className="font-bold mb-1">"{item.questions}"</div>
-
-                        </td>
-                        <td className="p-5 text-center">
-                          <span className="px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-black">{item.rating}/5</span>
-                        </td>
-                      </tr>
+                       <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all">
+                         <td className="p-5 font-black dark:text-white text-base">{item.company}</td>
+                         <td className="p-5">
+                            <div className="font-bold mb-1">"{item.questions}"</div>
+                         </td>
+                         <td className="p-5 text-center">
+                            <span className="px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-black">{item.rating}/5</span>
+                         </td>
+                       </tr>
                      ))}
                    </tbody>
                  </table>
               </div>
             </div>
+            </>
+            )}
           </div>
         );
       default: return null;
@@ -290,7 +421,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
         <header className="sticky top-0 z-40 flex items-center justify-between px-10 py-8 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800">
-          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{view === 'profile' ? 'Intelligence Hub' : view.charAt(0).toUpperCase() + view.slice(1)}</h2>
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{view === 'profile' ? 'Database' : view.charAt(0).toUpperCase() + view.slice(1)}</h2>
           <div className="flex items-center gap-5">
             <div id="googleSignInBtn"></div>
             <ThemeToggle theme={theme} toggle={toggleTheme} />
