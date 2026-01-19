@@ -42,18 +42,7 @@ export const AIInsights: React.FC<AIInsightsProps> = ({ applications, user }) =>
       className="bg-gradient-to-br from-indigo-500 to-indigo-700 p-1 rounded-[2.5rem] shadow-xl shadow-indigo-500/20 relative overflow-hidden group"
     >
       <div className="bg-white dark:bg-slate-950 rounded-[2.4rem] p-8 lg:p-10">
-        <div className="absolute top-6 right-6 z-10">
-          <button 
-            onClick={fetchInsights}
-            disabled={loading}
-            className="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 rounded-full disabled:opacity-50 transition-all active:rotate-180 duration-500"
-            title="Refresh Insights"
-          >
-            <svg className={`w-6 h-6 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
-        </div>
+        
 
         <div className="flex flex-col lg:flex-row items-start gap-8">
           <div className="w-16 h-16 bg-indigo-500 rounded-3xl flex items-center justify-center shrink-0 shadow-xl shadow-indigo-500/30 ring-4 ring-indigo-500/10">
