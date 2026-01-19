@@ -180,12 +180,11 @@ const handleGenerateAI = async (id: number, question: string) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // USE THE EXACT NAME FROM YOUR DIAGNOSTIC LIST (index 4)
-    // Note: We remove the "models/" part, the SDK adds that automatically
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // We are switching to 'gemini-1.5-flash'. 
+    // It is the most stable free-tier model and usually has the best quota.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Provide a short, professional interview answer for: ${question}`;
-    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -197,8 +196,27 @@ const handleGenerateAI = async (id: number, question: string) => {
     setSyncStatus('saved');
   } catch (error: any) {
     console.error("Gemini Error:", error);
-    // Fallback to 2.5 if 2.0 somehow fails
-    alert("AI Error: " + error.message);
+
+    // If you get the 429 Quota error again, try the Lite version
+    if (error.message.includes('429')) {
+       console.log("Quota exceeded, trying Lite model...");
+       try {
+         const genAI = new GoogleGenerativeAI(apiKey);
+         // This model (index 8 in your list) is designed to be very low-resource
+         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+         const result = await model.generateContent(`Short answer: ${question}`);
+         const text = (await result.response).text();
+         setInterviews((prev: any) => prev.map((item: any) => 
+            item.id === id ? { ...item, aiResponse: text } : item
+         ));
+         setSyncStatus('saved');
+         return;
+       } catch (innerError) {
+         alert("Daily free limit reached for Gemini. Please try again tomorrow.");
+       }
+    } else {
+      alert("AI Error: " + error.message);
+    }
     setSyncStatus('idle');
   }
 };
