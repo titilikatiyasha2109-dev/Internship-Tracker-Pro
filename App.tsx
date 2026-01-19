@@ -96,18 +96,20 @@ const [interviews, setInterviews] = useState(() => {
     setApplications(prev => [...prev, appWithId]);
     setShowForm(false);
   };
+  //Handle Add contact
 const handleAddContact = () => {
   const name = prompt("Enter Contact Name:");
   const company = prompt("Enter Company:");
   const role = prompt("Enter Role (e.g. Recruiter):");
+  const contactNo = prompt("Contact Number / LinkedIn:");
 
   if (name && company) {
     const newContact = {
       id: Date.now(), // Unique ID generator
       name,
       company,
-      role: role || 'Contact',
-      link: '#'
+      role: contactNo || 'N/A', // Storing contact/link here
+      link: contactNo?.startsWith('http') ? contactNo : '#'
     };
     setContacts(prev => [...prev, newContact]);
     setSyncStatus('syncing');
@@ -119,22 +121,46 @@ const handleAddContact = () => {
       app.id === id ? { ...app, status: newStatus, lastUpdate: new Date().toISOString() } : app
     ));
   };
-const handleAddInterview = () => {
-  const company = prompt("Company Name:");
-  const questions = prompt("Key Questions Asked (Separated by commas):");
-  const rating = prompt("Rate your performance (1 to 5):");
 
-  if (company) {
+//Handle Add Interview
+const handleAddInterview = async () => {
+  const company = prompt("Company Name:");
+  const questions = prompt("Which question was asked?");
+  const rating = prompt("Rate your performance (1-5):");
+
+  if (company && questions) {
+    setSyncStatus('syncing');
+
+    let geminiAnswer = "AI is thinking...";
+
+    try {
+      // Yahan hum Gemini API ko call kar rahe hain
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GOOGLE_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Provide a short, 2-sentence professional answer for this interview question: ${questions}` }] }]
+        })
+      });
+
+      const data = await response.json();
+      geminiAnswer = data.candidates[0].content.parts[0].text;
+    } catch (error) {
+      console.error("Gemini Error:", error);
+      geminiAnswer = "Could not fetch AI answer. Try checking your API key.";
+    }
+
     const newInterview = {
       id: Date.now(),
       company,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      questions: questions || 'No notes added',
-      rating: parseInt(rating) || 5
+      questions,
+      rating: parseInt(rating) || 5,
+      aiResponse: geminiAnswer // Gemini ka answer yahan store hoga
     };
-    setInterviews(prev => [...prev, newInterview]);
-    setSyncStatus('syncing');
-    setTimeout(() => setSyncStatus('saved'), 800);
+
+    setInterviews(prev => [newInterview, ...prev]);
+    setSyncStatus('saved');
   }
 };
 
