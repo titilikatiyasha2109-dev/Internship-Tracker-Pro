@@ -1,5 +1,4 @@
 import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, ExternalLink, Mail, Phone, Trash2 } from 'lucide-react';
-import { ..., Trash2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InternshipApplication, ApplicationStatus, UserProfile } from './types';
