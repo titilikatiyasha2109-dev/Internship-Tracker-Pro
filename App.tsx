@@ -184,7 +184,10 @@ const handleGenerateAI = async (id: number, question: string) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     
     // 2. Get the model (using the stable 1.5 flash)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-1.5-flash" },
+      { apiVersion: "v1" } 
+    );
 
     // 3. Generate content
     const prompt = `Provide a short, professional interview answer for: ${question}`;
