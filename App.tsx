@@ -177,47 +177,33 @@ const handleGenerateAI = async (id: number, question: string) => {
 
   setSyncStatus('syncing');
 
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // We are switching to 'gemini-1.5-flash'. 
-    // It is the most stable free-tier model and usually has the best quota.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // We will try these models in order until one works
+  const modelsToTry = ["gemini-1.5-flash", "gemini-2.0-flash-lite", "gemini-pro"];
 
-    const prompt = `Provide a short, professional interview answer for: ${question}`;
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+  for (const modelName of modelsToTry) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: modelName });
 
-    setInterviews((prev: any) => prev.map((item: any) => 
-      item.id === id ? { ...item, aiResponse: text } : item
-    ));
-    
-    setSyncStatus('saved');
-  } catch (error: any) {
-    console.error("Gemini Error:", error);
+      const prompt = `Provide a short, professional interview answer for: ${question}`;
+      const result = await model.generateContent(prompt);
+      const text = (await result.response).text();
 
-    // If you get the 429 Quota error again, try the Lite version
-    if (error.message.includes('429')) {
-       console.log("Quota exceeded, trying Lite model...");
-       try {
-         const genAI = new GoogleGenerativeAI(apiKey);
-         // This model (index 8 in your list) is designed to be very low-resource
-         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-         const result = await model.generateContent(`Short answer: ${question}`);
-         const text = (await result.response).text();
-         setInterviews((prev: any) => prev.map((item: any) => 
-            item.id === id ? { ...item, aiResponse: text } : item
-         ));
-         setSyncStatus('saved');
-         return;
-       } catch (innerError) {
-         alert("Daily free limit reached for Gemini. Please try again tomorrow.");
-       }
-    } else {
-      alert("AI Error: " + error.message);
+      // If we reach here, it worked!
+      setInterviews((prev: any) => prev.map((item: any) => 
+        item.id === id ? { ...item, aiResponse: text } : item
+      ));
+      setSyncStatus('saved');
+      return; // Exit the function once successful
+
+    } catch (error: any) {
+      console.warn(`Model ${modelName} failed, trying next...`, error.message);
+      // If it's the last model and it still fails, show the error
+      if (modelName === modelsToTry[modelsToTry.length - 1]) {
+        alert("AI limit reached for today. Google Free Tier allows 1500 requests/day, but experimental models (2.0/2.5) are currently restricted. Please try again in 24 hours.");
+        setSyncStatus('idle');
+      }
     }
-    setSyncStatus('idle');
   }
 };
 
