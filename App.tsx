@@ -1,4 +1,5 @@
 import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, ExternalLink, Mail, Phone, Trash2 } from 'lucide-react';
+import { ..., Trash2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InternshipApplication, ApplicationStatus, UserProfile } from './types';
@@ -155,6 +156,17 @@ const App: React.FC = () => {
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
+
+  //Handle Delete Contact
+  const handleDeleteContact = (id: number) => {
+  if (window.confirm("Are you sure you want to remove this expert from your network?")) {
+    setContacts(prev => prev.filter(contact => contact.id !== id));
+    
+    // Trigger the sync animation
+    setSyncStatus('syncing');
+    setTimeout(() => setSyncStatus('saved'), 800);
+  }
+};
 
   const renderContent = () => {
     switch (view) {
