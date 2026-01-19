@@ -169,31 +169,46 @@ const App: React.FC = () => {
 
 // Function to generate/refresh AI response for an existing entry
 const handleGenerateAI = async (id: number, question: string) => {
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  
+  if (!apiKey) {
+    alert("Error: API Key is missing in .env file (VITE_GOOGLE_API_KEY)");
+    return;
+  }
+
   setSyncStatus('syncing');
   
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GOOGLE_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         contents: [{ 
-          parts: [{ text: `Provide a short, professional, and high-quality answer for this technical interview question: ${question}` }] 
+          parts: [{ text: `Provide a short, professional answer for this interview question: ${question}` }] 
         }] 
       })
     });
     
     const data = await response.json();
+
+    // Check if Gemini returned an error (like invalid key or quota)
+    if (data.error) {
+       console.error("Gemini API Error:", data.error);
+       alert(`Gemini Error: ${data.error.message}`);
+       setSyncStatus('idle');
+       return;
+    }
+
     const geminiAnswer = data.candidates[0].content.parts[0].text;
 
-    // Update the specific interview entry in the state
     setInterviews((prev: any) => prev.map((item: any) => 
       item.id === id ? { ...item, aiResponse: geminiAnswer } : item
     ));
     
     setSyncStatus('saved');
   } catch (e) {
-    console.error("AI Fetch Error:", e);
-    alert("Could not reach Gemini. Please check your internet or API key.");
+    console.error("Network Error:", e);
+    alert("Network error. Check your connection.");
     setSyncStatus('idle');
   }
 };
