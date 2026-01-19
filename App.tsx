@@ -252,9 +252,7 @@ const App: React.FC = () => {
                         <td className="p-5 font-black dark:text-white text-base">{item.company}</td>
                         <td className="p-5">
                           <div className="font-bold mb-1">"{item.questions}"</div>
-                          <div className="text-[10px] text-indigo-400 italic bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10">
-                            ✨ <span className="font-black uppercase mr-1">AI:</span> {item.aiResponse}
-                          </div>
+
                         </td>
                         <td className="p-5 text-center">
                           <span className="px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-lg text-[10px] font-black">{item.rating}/5</span>
