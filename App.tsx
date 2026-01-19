@@ -221,11 +221,7 @@ const LoginWall = () => (
       Please sign in with Google to unlock your personal Intelligence Hub and start tracking experts.
     </p>
     {/* This target div is where Google renders the button */}
-    {isLoggedIn && (
-  <button onClick={handleLogout} className="text-[10px] font-black uppercase text-slate-500 hover:text-rose-500 transition-colors">
-    Logout
-  </button>
-)}
+
     <div id="googleSignInBtn"></div>
   </div>
 );
@@ -425,8 +421,13 @@ const LoginWall = () => (
           <div className="flex items-center gap-5">
             <div id="googleSignInBtn"></div>
             <ThemeToggle theme={theme} toggle={toggleTheme} />
-            <button onClick={() => setShowForm(true)} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Log App</button>
+            <button onClick={() => setShowForm(true)} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Add Application</button>
           </div>
+              {isLoggedIn && (
+  <button onClick={handleLogout} className="text-[10px] font-black uppercase text-slate-500 hover:text-rose-500 transition-colors">
+    Logout
+  </button>
+)}
         </header>
 
         <div className="p-10 max-w-7xl mx-auto w-full">
