@@ -416,19 +416,44 @@ const LoginWall = () => (
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
-        <header className="sticky top-0 z-40 flex items-center justify-between px-10 py-8 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800">
-          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{view === 'profile' ? 'Database' : view.charAt(0).toUpperCase() + view.slice(1)}</h2>
-          <div className="flex items-center gap-5">
-            <div id="googleSignInBtn"></div>
-            <ThemeToggle theme={theme} toggle={toggleTheme} />
-            <button onClick={() => setShowForm(true)} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest">Add Application</button>
-          </div>
-              {isLoggedIn && (
-  <button onClick={handleLogout} className="text-[10px] font-black uppercase text-slate-500 hover:text-rose-500 transition-colors">
-    Logout
-  </button>
-)}
-        </header>
+<header className="sticky top-0 z-40 flex items-center justify-between px-10 py-6 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800">
+  {/* Left Side: Dynamic Title */}
+  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+    {view === 'profile' ? 'Intelligence Hub' : view.charAt(0).toUpperCase() + view.slice(1)}
+  </h2>
+
+  {/* Right Side: Grouped Actions */}
+  <div className="flex items-center gap-4 lg:gap-6">
+    
+    {/* Auth Group: Google Sign In and Logout */}
+    <div className="flex items-center gap-4 pr-6 border-r border-slate-200 dark:border-slate-800">
+      <div id="googleSignInBtn" className="scale-90 origin-right"></div>
+      
+      {isLoggedIn && (
+        <button 
+          onClick={handleLogout} 
+          className="px-4 py-2 text-[10px] font-black uppercase text-slate-400 hover:text-rose-500 hover:bg-rose-500/5 rounded-xl transition-all"
+        >
+          Logout
+        </button>
+      )}
+    </div>
+
+    {/* Controls Group: Theme and Main Action */}
+    <div className="flex items-center gap-4">
+      <div className="p-1 bg-slate-100 dark:bg-slate-900 rounded-xl">
+        <ThemeToggle theme={theme} toggle={toggleTheme} />
+      </div>
+
+      <button 
+        onClick={() => setShowForm(true)} 
+        className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+      >
+        Add Application
+      </button>
+    </div>
+  </div>
+</header>
 
         <div className="p-10 max-w-7xl mx-auto w-full">
           <AnimatePresence mode="wait">
