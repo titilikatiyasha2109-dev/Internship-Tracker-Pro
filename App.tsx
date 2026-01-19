@@ -168,34 +168,28 @@ const App: React.FC = () => {
   }
 };
 
+
+
 // Function to generate/refresh AI response for an existing entry
 const handleGenerateAI = async (id: number, question: string) => {
   const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
-
-  if (!apiKey) {
-    alert("API Key is missing. Please check your Vercel settings or .env file.");
-    return;
-  }
+  if (!apiKey) return;
 
   setSyncStatus('syncing');
 
   try {
-    // 1. Initialize the SDK
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // 2. Get the model (using the stable 1.5 flash)
-    const model = genAI.getGenerativeModel(
-      { model: "gemini-pro" },
-      { apiVersion: "v1" } 
-    );
+    // USE THE EXACT NAME FROM YOUR DIAGNOSTIC LIST (index 4)
+    // Note: We remove the "models/" part, the SDK adds that automatically
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // 3. Generate content
     const prompt = `Provide a short, professional interview answer for: ${question}`;
+    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    // 4. Update your state
     setInterviews((prev: any) => prev.map((item: any) => 
       item.id === id ? { ...item, aiResponse: text } : item
     ));
@@ -203,6 +197,7 @@ const handleGenerateAI = async (id: number, question: string) => {
     setSyncStatus('saved');
   } catch (error: any) {
     console.error("Gemini Error:", error);
+    // Fallback to 2.5 if 2.0 somehow fails
     alert("AI Error: " + error.message);
     setSyncStatus('idle');
   }
