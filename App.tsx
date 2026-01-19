@@ -237,10 +237,10 @@ const App: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {contacts.map((contact: any) => (
-                  <div key={contact.id} className="p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2rem] border border-transparent hover:border-indigo-500/30 transition-all flex flex-col gap-5 shadow-sm">
+                  <div key={contact.id} className=" group p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2rem] border border-transparent hover:border-indigo-500/30 transition-all flex flex-col gap-5 shadow-sm">
                         <button 
                         onClick={() => handleDeleteContact(contact.id)}
-                        className="absolute top-4 right-12 p-2 text-slate-400                   hover:text-rose-500 hover:bg-rose-500/10 rounded-xl                   transition-all opacity-0 group-hover:opacity-100"
+                        className="absolute top-4 right-12 p-2 text-slate-400                   hover:text-rose-500 hover:bg-rose-500/10 rounded-xl                   transition-all"
                         title="Delete Contact"
                         >
                         <Trash2 size={16} />
