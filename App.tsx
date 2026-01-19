@@ -1,4 +1,4 @@
-import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, ExternalLink } from 'lucide-react';
+import { Users, BookOpen, Download, Plus, MessageSquare, Linkedin, ExternalLink, Mail, Phone} from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InternshipApplication, ApplicationStatus, UserProfile } from './types';
@@ -98,22 +98,22 @@ const [interviews, setInterviews] = useState(() => {
   };
   //Handle Add contact
 const handleAddContact = () => {
-  const name = prompt("Enter Contact Name:");
-  const company = prompt("Enter Company:");
-  const role = prompt("Enter Role (e.g. Recruiter):");
-  const contactNo = prompt("Contact Number / LinkedIn:");
+  const name = prompt("Expert's Name:");
+  const company = prompt("Company:");
+  const email = prompt("Email:");
+  const phone = prompt("Phone:");
+  const linkedin = prompt("LinkedIn URL:");
 
   if (name && company) {
     const newContact = {
-      id: Date.now(), // Unique ID generator
+      id: Date.now(),
       name,
       company,
-      role: contactNo || 'N/A', // Storing contact/link here
-      link: contactNo?.startsWith('http') ? contactNo : '#'
+      email: email || '',
+      phone: phone || '',
+      link: linkedin?.startsWith('http') ? linkedin : '#'
     };
-    setContacts(prev => [...prev, newContact]);
-    setSyncStatus('syncing');
-    setTimeout(() => setSyncStatus('saved'), 800);
+    setContacts(prev => [newContact, ...prev]);
   }
 };
   const updateStatus = (id: string, newStatus: ApplicationStatus) => {
@@ -306,25 +306,83 @@ useEffect(() => {
             </div>
                   
             {/* MIDDLE ROW: NETWORKING CRM */}
-            <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500"><Linkedin size={20} /></div>
-                  <h2 className="text-xl font-bold dark:text-white">Networking CRM</h2>
-                </div>
-                <button 
-                onClick={handleAddContact} 
-                className="p-4 border-2 border-dashed               border-slate-200 dark:border-slate-800 rounded-2xl              flex items-center justify-center gap-2              text-slate-400 hover:border-indigo-500            hover:text-indigo-500 transition-all">             
-                <Plus size={16} /> <span className="text-xs               font-bold uppercase">Add Expert</span>
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {contacts.map((contact) => (
-                <div key={contact.id} className="...">
-                <div className="text-white font-bold">{contact.name}</div>
-              </div>
-              ))}
+<div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm">
+  {/* Header Section */}
+  <div className="flex justify-between items-center mb-6">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-blue-500/10 rounded-xl text-blue-500">
+        <Linkedin size={20} />
+      </div>
+      <h2 className="text-xl font-bold dark:text-white">Networking CRM</h2>
+    </div>
+    
+    <button 
+      onClick={handleAddContact} 
+      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 transition-colors"
+    >
+      <Plus size={20} />
+    </button>
+  </div>
+
+  {/* The Grid of Contacts */}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {contacts.map((contact) => (
+      <div 
+        key={contact.id} 
+        className="p-5 bg-slate-50 dark:bg-slate-800/40 rounded-[2rem] border border-transparent hover:border-indigo-500/30 transition-all flex flex-col gap-4 group shadow-sm"
+      >
+        {/* Top: Header with Initial and LinkedIn */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
+              {contact.name ? contact.name[0] : '?'}
             </div>
+            <div>
+              <div className="text-sm font-black text-slate-900 dark:text-white leading-tight">
+                {contact.name}
+              </div>
+              <div className="text-[10px] text-indigo-500 uppercase font-black tracking-widest mt-1">
+                {contact.company}
+              </div>
+            </div>
+          </div>
+          
+          <a 
+            href={contact.link} 
+            target="_blank" 
+            rel="noreferrer"
+            className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-all"
+          >
+            <Linkedin size={14} />
+          </a>
+        </div>
+
+        {/* Bottom: Email and Phone Details */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Mail size={12} className="text-indigo-500" />
+            <span className="text-[11px] font-medium truncate">{contact.email || 'No email'}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Phone size={12} className="text-indigo-500" />
+            <span className="text-[11px] font-medium">{contact.phone || 'No phone'}</span>
+          </div>
+        </div>
+      </div>
+    ))}
+
+    {/* "Add Expert" Button Card */}
+    <button 
+      onClick={handleAddContact} 
+      className="p-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-indigo-500 hover:text-indigo-500 hover:bg-indigo-500/5 transition-all group min-h-[160px]"
+    >
+      <div className="p-3 bg-slate-100 dark:bg-slate-900 rounded-2xl group-hover:bg-indigo-500 group-hover:text-white transition-all">
+        <Plus size={24} />
+      </div>
+      <span className="text-xs font-black uppercase tracking-widest">Add New Expert</span>
+    </button>
+  </div>
+</div>
                   
 
             </div>
