@@ -42,7 +42,7 @@ export const googleCalendarService = {
       location: app.location || 'Remote / TBA',
       description: `Interview for the ${app.role} position.\n\nNotes from InternTrack:\n${app.notes || 'No specific notes added.'}\n\nTracked via InternTrack Pro: Smart Career Management`,
       start: {
-        dateTime: new Date(FormData.interviewDate).toISOString(),
+        dateTime: new Date(app.interviewDate).toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       end: {
