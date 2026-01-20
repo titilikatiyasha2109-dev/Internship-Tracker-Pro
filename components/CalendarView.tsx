@@ -54,13 +54,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ applications }) => {
     setSyncedIds(new Set());
   };
 
-  const handleSync = async (app: InternshipApplication) => {
-    if (!isAuthenticated) {
-      handleLogin();
-      return;
-    }
+const handleSync = async (app: InternshipApplication) => {
+  if (!isAuthenticated) {
+    handleLogin();
+    return;
+  }
 
-    setSyncingId(app.id);
+  setSyncingId(app.id); // Starts "Connecting..."
+
+  try {
     const success = await googleCalendarService.createEvent(app);
     
     if (success) {
@@ -68,16 +70,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ applications }) => {
       newSynced.add(app.id);
       setSyncedIds(newSynced);
       localStorage.setItem('synced_calendar_events', JSON.stringify(Array.from(newSynced)));
-    } else if (!googleCalendarService.isTokenValid()) {
-      setIsAuthenticated(false);
-      alert("Session expired. Please log in to Google again.");
     } else {
-      alert("There was an error syncing to your Google Calendar. Please check your permissions.");
+      // Check if the failure was due to an expired token
+      if (!googleCalendarService.isTokenValid()) {
+        setIsAuthenticated(false);
+        alert("Session expired. Please log in to Google again.");
+      } else {
+        alert("Could not sync. Ensure the Google Calendar API is enabled in your Google Cloud Console.");
+      }
     }
-    
-    setSyncingId(null);
-  };
-
+  } catch (error) {
+    console.error("Sync Error:", error);
+    alert("A network error occurred while connecting to Google Calendar.");
+  } finally {
+    // THIS IS THE FIX: This always runs, even if there's an error
+    setSyncingId(null); 
+  }
+};
   const events = applications
     .filter(app => app.interviewDate)
     .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime());
