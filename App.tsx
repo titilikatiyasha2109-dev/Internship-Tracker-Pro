@@ -83,6 +83,13 @@ const [user, setUser] = useState<UserProfile>(() => {
   useEffect(() => { localStorage.setItem('itp_contacts', JSON.stringify(contacts)); }, [contacts]);
   useEffect(() => { localStorage.setItem('itp_interviews', JSON.stringify(interviews)); }, [interviews]);
 
+  // Add this near your other useEffects in App.tsx
+useEffect(() => {
+  if (applications.length > 0) {
+    dbService.saveApplications(applications);
+  }
+}, [applications]);
+
   useEffect(() => {
     const init = async () => {
       const savedApps = await dbService.getApplications();
@@ -199,11 +206,16 @@ const [user, setUser] = useState<UserProfile>(() => {
     setShowForm(false);
   };
 
-  const updateStatus = (id: string, newStatus: ApplicationStatus) => {
-    setApplications(prev => prev.map(app => 
+const updateStatus = async (id: string, newStatus: ApplicationStatus) => {
+  setApplications(prev => {
+    const updated = prev.map(app => 
       app.id === id ? { ...app, status: newStatus, lastUpdate: new Date().toISOString() } : app
-    ));
-  };
+    );
+    // Persist immediately to be safe
+    dbService.saveApplications(updated);
+    return updated;
+  });
+};
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -231,8 +243,14 @@ const LoginWall = () => (
       case 'dashboard':
         return (
           <div className="space-y-12">
+                {!applications ? (
+        <div className="text-white">Loading data...</div>
+      ) : (
+        <>
             <AIInsights applications={applications} user={user} />
             <Dashboard applications={applications} onViewCalendar={() => setView('calendar')} />
+            </>
+      )}
           </div>
         );
       case 'kanban':
