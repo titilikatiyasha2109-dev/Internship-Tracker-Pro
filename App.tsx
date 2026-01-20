@@ -92,12 +92,20 @@ useEffect(() => {
 
   useEffect(() => {
     const init = async () => {
-      const savedApps = await dbService.getApplications();
-      const savedUser = await dbService.getUser();
-      setApplications(savedApps);
-      setUser(savedUser);
+      try {
+        const savedApps = await dbService.getApplications();
+        const savedUser = await dbService.getUser();
+        
+        // Ensure we always have an array, even if empty
+        setApplications(savedApps || []); 
+        setUser(savedUser || { name: '', goal: '', targetIndustry: '' });
+      } catch (err) {
+        console.error("Failed to initialize:", err);
+        setApplications([]); // Fallback to empty array
+      }
     };
     init();
+    
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' || 'dark';
     setTheme(savedTheme);
     document.documentElement.classList.toggle('dark', savedTheme === 'dark');
@@ -206,16 +214,13 @@ useEffect(() => {
     setShowForm(false);
   };
 
-const updateStatus = async (id: string, newStatus: ApplicationStatus) => {
-  setApplications(prev => {
-    const updated = prev.map(app => 
-      app.id === id ? { ...app, status: newStatus, lastUpdate: new Date().toISOString() } : app
+const updateStatus = (id: string, newStatus: ApplicationStatus) => {
+    setApplications(prev => 
+      prev.map(app => 
+        app.id === id ? { ...app, status: newStatus, lastUpdate: new Date().toISOString() } : app
+      )
     );
-    // Persist immediately to be safe
-    dbService.saveApplications(updated);
-    return updated;
-  });
-};
+  };
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -243,14 +248,18 @@ const LoginWall = () => (
       case 'dashboard':
         return (
           <div className="space-y-12">
-                {!applications ? (
-        <div className="text-white">Loading data...</div>
-      ) : (
-        <>
-            <AIInsights applications={applications} user={user} />
-            <Dashboard applications={applications} onViewCalendar={() => setView('calendar')} />
-            </>
-      )}
+            {/* If there are no applications, show a friendly empty state instead of crashing */}
+            {applications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-slate-900/20 rounded-[3rem] border-2 border-dashed border-slate-800">
+                <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">No Applications Tracked Yet</p>
+                <button onClick={() => setShowForm(true)} className="mt-4 text-indigo-500 font-black text-sm">Add your first application to see insights</button>
+              </div>
+            ) : (
+              <>
+                <AIInsights applications={applications} user={user} />
+                <Dashboard applications={applications} onViewCalendar={() => setView('calendar')} />
+              </>
+            )}
           </div>
         );
       case 'kanban':
