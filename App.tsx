@@ -64,6 +64,7 @@ const App: React.FC = () => {
   });
 
   const [applications, setApplications] = useState<InternshipApplication[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
 const [isLoggedIn, setIsLoggedIn] = useState(() => {
   return localStorage.getItem('isLoggedIn') === 'true';
 });
@@ -85,10 +86,10 @@ const [user, setUser] = useState<UserProfile>(() => {
 
   // Add this near your other useEffects in App.tsx
 useEffect(() => {
-  if (applications.length > 0) {
+  if (hasLoaded) {
     dbService.saveApplications(applications);
   }
-}, [applications]);
+}, [applications, hasLoaded]);
 
   useEffect(() => {
     const init = async () => {
@@ -99,9 +100,8 @@ useEffect(() => {
         // Ensure we always have an array, even if empty
         setApplications(savedApps || []); 
         setUser(savedUser || { name: '', goal: '', targetIndustry: '' });
-      } catch (err) {
-        console.error("Failed to initialize:", err);
-        setApplications([]); // Fallback to empty array
+      } finally {
+       setHasLoaded(true);
       }
     };
     init();
@@ -246,6 +246,15 @@ const LoginWall = () => (
   const renderContent = () => {
     switch (view) {
       case 'dashboard':
+          // If we haven't finished loading from the database, show a spinner
+  if (!hasLoaded) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Restoring Session...</p>
+      </div>
+    );
+  }
         return (
           <div className="space-y-12">
             {/* If there are no applications, show a friendly empty state instead of crashing */}
