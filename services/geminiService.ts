@@ -38,7 +38,7 @@ export const getAIInsights = async (applications: InternshipApplication[], user?
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     return {
-      summary: "I'm having trouble analyzing your specific career path right now, but your momentum is great!",
+      summary: "Your momentum is great! Keep it up",
       tips: ["Review your resume for each specific role.", "Follow up 1 week after applying.", "Network on LinkedIn with employees."]
     };
   }
