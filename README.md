@@ -11,9 +11,9 @@
 **Team Name:** [Binary Brains]
 
 *   **Team Leader:** Tiyasha Chatterjee
-*   **Team Member:** [Arayan Sharma]
-*   **Team Member:** [Sanchari Ray]
-*   **Team Member:** [Riya Gupta]
+*   **Team Member:** Arayan Sharma
+*   **Team Member:** Sanchari Ray
+*   **Team Member:** Riya Gupta
 
 ---
 
