@@ -8,7 +8,7 @@
 
 ## 👥 The Development Team
 
-**Team Name:** [Binary Brains]
+**Team Name:** Binary Brains
 
 *   **Team Leader:** Tiyasha Chatterjee
 *   **Team Member:** Arayan Sharma
