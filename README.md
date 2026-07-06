@@ -1,4 +1,4 @@
-# 🚀 InternTrack Pro 2.0
+# 🚀 InternTrack Pro 3.0
 
 **InternTrack Pro** is a high-performance, AI-integrated command center designed to streamline the internship hunt. It combines an intuitive application tracker, a networking CRM, and an automated interview preparation vault into one seamless, glassmorphic interface.
 
